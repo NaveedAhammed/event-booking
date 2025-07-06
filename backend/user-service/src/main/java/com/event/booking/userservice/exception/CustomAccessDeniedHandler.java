@@ -1,4 +1,4 @@
-package com.ecommerce.customerservice.exception;
+package com.event.booking.userservice.exception;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
