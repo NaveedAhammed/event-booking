@@ -1,2 +1,7 @@
 .DS_Store
 .idea/
+# Ignore Maven build folder
+target/
+
+# Ignore application secrets
+src/main/resources/application.properties
