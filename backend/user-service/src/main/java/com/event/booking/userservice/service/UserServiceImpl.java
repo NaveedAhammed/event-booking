@@ -4,7 +4,9 @@ import com.event.booking.userservice.dto.AuthResponse;
 import com.event.booking.userservice.dto.LoginRequest;
 import com.event.booking.userservice.dto.RegisterRequest;
 import com.event.booking.userservice.dto.UserResponse;
+import com.event.booking.userservice.exception.InvalidCredentials;
 import com.event.booking.userservice.exception.UserAlreadyExistsException;
+import com.event.booking.userservice.exception.UserNotFoundException;
 import com.event.booking.userservice.mapper.UserMapper;
 import com.event.booking.userservice.model.User;
 import com.event.booking.userservice.model.enums.Role;
@@ -50,7 +52,18 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        return null;
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_WITH_EMAIL + request.getEmail()));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new InvalidCredentials(INVALID_CREDENTIALS);
+        }
+
+        String token = jwtService.generateToken(user);
+
+        log.info("Login successful for user: {}", user.getEmail());
+
+        return UserMapper.toAuthResponse(user, token);
     }
 
     @Override

@@ -7,4 +7,5 @@ public final class Constants {
     public final static String INVALID_JWT_TOKEN = "Invalid jwt token";
     public final static String USER_NOT_FOUND_WITH_EMAIL = "User not found with email";
     public final static String ROLE = "role";
+    public final static String INVALID_CREDENTIALS = "Invalid email or password";
 }
