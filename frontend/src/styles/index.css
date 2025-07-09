@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap");
 @import "tailwindcss";
 
 /* :root {
@@ -60,6 +61,8 @@
 } */
 
 @theme {
+	--font-sans: "Nunito Sans", sans-serif;
+
 	--color-primary: oklch(0.705 0.213 47.604);
 	--color-background: oklch(1 0 0);
 	--color-foreground: oklch(0.141 0.005 285.823);
