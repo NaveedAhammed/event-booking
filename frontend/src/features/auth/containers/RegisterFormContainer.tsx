@@ -1,41 +1,45 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { type LoginSchema, loginSchema } from "../schema/loginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import LoginForm from "../components/LoginForm";
 import authService from "../services/authService";
+import RegisterForm from "../components/RegisterForm";
+import { registerSchema, type RegisterSchema } from "../schema/registerSchema";
 
-const LoginFormContainer = () => {
+const RegisterFormContainer = () => {
 	const navigate = useNavigate();
 	const {
 		handleSubmit,
 		register,
 		formState: { errors, isSubmitting },
-	} = useForm<LoginSchema>({
-		resolver: zodResolver(loginSchema),
+		watch,
+		setValue,
+	} = useForm<RegisterSchema>({
+		resolver: zodResolver(registerSchema),
 	});
 
-	const onSubmit = async (data: LoginSchema) => {
+	const onSubmit = async (data: RegisterSchema) => {
 		try {
-			const res = await authService.login(data);
-			console.log("Logged in: ", res);
+			const res = await authService.register(data);
+			console.log("Registered: ", res);
 
 			navigate("/");
 		} catch (err) {
-			console.log("Login error:", err);
+			console.log("Register error:", err);
 		}
 	};
 
 	return (
 		<div className="flex items-center justify-center h-[80vh]">
-			<LoginForm
+			<RegisterForm
 				onSubmit={handleSubmit(onSubmit)}
 				register={register}
 				errors={errors}
 				isSubmitting={isSubmitting}
+				watch={watch}
+				setValue={setValue}
 			/>
 		</div>
 	);
 };
 
-export default LoginFormContainer;
+export default RegisterFormContainer;

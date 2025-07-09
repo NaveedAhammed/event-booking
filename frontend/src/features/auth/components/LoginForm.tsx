@@ -14,7 +14,7 @@ const LoginForm = ({ onSubmit, register, errors, isSubmitting }: Props) => {
 	return (
 		<form
 			onSubmit={onSubmit}
-			className="bg-white p-6 rounded shadow-md w-full max-w-md flex flex-col gap-4"
+			className="bg-white p-6 w-full max-w-md flex flex-col gap-4"
 		>
 			<h2 className="text-2xl font-semibold text-center">Login</h2>
 

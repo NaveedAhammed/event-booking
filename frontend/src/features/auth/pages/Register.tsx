@@ -1,7 +1,5 @@
-function Register() {
-  return (
-    <div>Register</div>
-  )
-}
+import RegisterFormContainer from "../containers/RegisterFormContainer";
+
+const Register = () => <RegisterFormContainer />;
 
 export default Register;
