@@ -8,8 +8,13 @@ function NavBar() {
 		<header className="h-16 flex items-center shadow">
 			<div className="w-[1200px] mx-auto flex items-center justify-between">
 				<Link to="/">
-					<div className="">
-						<img src={logo} alt="Event Booking" className="h-11" />
+					<div className="h-12 flex items-center">
+						<img
+							src={logo}
+							alt="Event Booking"
+							className="h-full w-full object-cover"
+						/>
+						<span className="text-2xl font-bold">Eventer</span>
 					</div>
 				</Link>
 				<nav>

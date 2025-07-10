@@ -11,6 +11,8 @@ import { Select } from "@/components/Select/Select";
 import { FiUser } from "react-icons/fi";
 import { LuLockKeyhole, LuMail } from "react-icons/lu";
 import { HiOutlineEyeOff } from "react-icons/hi";
+import { FcGoogle } from "react-icons/fc";
+import { FaGithub } from "react-icons/fa";
 
 interface Props {
 	onSubmit: () => void;
@@ -36,21 +38,17 @@ const RegisterForm = ({
 	setValue,
 }: Props) => {
 	return (
-		<form
-			onSubmit={onSubmit}
-			className="bg-white p-6 w-96 flex flex-col gap-4"
-		>
+		<form onSubmit={onSubmit} className="bg-white p-6 w-96 flex flex-col gap-4">
 			<h2 className="text-2xl font-semibold">Create an account</h2>
 
 			<p className="text-sm text-gray-500 mb-4">
-				Create an account so you can save event for your favorites, and
-				checkout faster.
+				Create an account so you can save event for your favorites, and checkout
+				faster.
 			</p>
 
 			<InputField
 				leadingIcon={FiUser}
 				type="text"
-				label="Name"
 				registration={register("name")}
 				error={errors.name}
 				placeholder="Username"
@@ -59,7 +57,6 @@ const RegisterForm = ({
 			<InputField
 				leadingIcon={LuMail}
 				type="email"
-				label="Email"
 				registration={register("email")}
 				error={errors.email}
 				placeholder="Email"
@@ -68,15 +65,13 @@ const RegisterForm = ({
 			<InputField
 				leadingIcon={LuLockKeyhole}
 				type="password"
-				label="Password"
 				registration={register("password")}
 				error={errors.password}
 				placeholder="Password"
-				tralingIcon={HiOutlineEyeOff}
+				trailingIcon={HiOutlineEyeOff}
 			/>
 
 			<Select
-				label="Role"
 				name="role"
 				value={watch("role")}
 				onChange={(val) => setValue("role", val)}
@@ -86,6 +81,21 @@ const RegisterForm = ({
 
 			<Button type="submit" disabled={isSubmitting}>
 				Sign Up
+			</Button>
+
+			<div className="border-t border-gray-200 mt-4 relative">
+				<span className="text-gray-400 text-xs absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-55%] bg-white px-2">
+					or you can sign in with
+				</span>
+			</div>
+
+			<Button variant="outline" className="gap-2 text-sm mt-4">
+				<FcGoogle size={20} />
+				<span>Continue with Google</span>
+			</Button>
+			<Button variant="outline" className="gap-2 text-sm mt-2">
+				<FaGithub size={20} />
+				<span>Continue with GitHub</span>
 			</Button>
 		</form>
 	);

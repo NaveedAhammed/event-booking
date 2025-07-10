@@ -6,31 +6,40 @@ import type { IconType } from "react-icons";
 interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 	leadingIcon?: IconType;
 	leadingIconSize?: number;
-	tralingIcon?: IconType;
-	tralingIconSize?: number;
-	label?: string;
+	trailingIcon?: IconType;
+	trailingIconSize?: number;
 	error?: FieldError;
 	registration: UseFormRegisterReturn;
+	disabled?: boolean;
 }
 
 const InputField = ({
 	leadingIcon: LeadingIcon,
 	leadingIconSize = 20,
-	tralingIcon: TralingIcon,
-	tralingIconSize = 20,
+	trailingIcon: TrailingIcon,
+	trailingIconSize = 20,
 	error,
 	registration,
 	className,
+	disabled,
 	...rest
 }: InputFieldProps) => {
 	const baseStyle =
-		"flex-1 outline-none placeholder:text-gray-500 placeholder:text-sm placeholder:pl-2";
+		"flex-1 outline-none placeholder:text-gray-400 placeholder:text-sm placeholder:pl-2";
 
 	return (
-		<div className="w-full">
-			<div className="w-full h-10 flex items-center ring ring-gray-300 focus-within:ring-primary rounded-xl">
+		<div
+			className={`w-full ${disabled ? "opacity-50 pointer-events-none" : ""}`}
+		>
+			<div
+				className={`w-full h-10 flex items-center ring ${
+					error
+						? "ring-rose-500 focus-within:ring-destructive"
+						: "ring-gray-300 focus-within:ring-primary"
+				} rounded-xl`}
+			>
 				{LeadingIcon && (
-					<div className="w-10 h-10 flex items-center justify-center text-gray-500">
+					<div className="w-10 h-10 flex items-center justify-center text-gray-400">
 						<LeadingIcon size={leadingIconSize} />
 					</div>
 				)}
@@ -38,15 +47,16 @@ const InputField = ({
 					className={clsx(baseStyle, className)}
 					{...registration}
 					{...rest}
+					disabled={disabled}
 				/>
-				{TralingIcon && (
-					<div className="w-10 h-10 flex items-center justify-center text-gray-500 cursor-pointer">
-						<TralingIcon size={tralingIconSize} />
+				{TrailingIcon && (
+					<div className="w-10 h-10 flex items-center justify-center text-gray-400 cursor-pointer">
+						<TrailingIcon size={trailingIconSize} />
 					</div>
 				)}
 			</div>
 			{error && (
-				<p className="text-xs ml-3 mt-2 font-semibold text-rose-500">
+				<p className="text-xs ml-3 mt-2 font-semibold text-destructive">
 					{error.message}
 				</p>
 			)}

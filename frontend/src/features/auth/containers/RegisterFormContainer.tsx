@@ -29,7 +29,7 @@ const RegisterFormContainer = () => {
 	};
 
 	return (
-		<div className="flex items-center justify-center h-[80vh]">
+		<div className="flex items-center justify-center py-2">
 			<RegisterForm
 				onSubmit={handleSubmit(onSubmit)}
 				register={register}
