@@ -15,17 +15,9 @@ public interface UserService {
 
     Map<String, String> login(LoginRequest request);
 
-    Map<String, String> oAuth(String email, String name);
+    Map<String, String> oAuth(String code);
 
     String refresh(String refreshToken);
-
-    UserResponse processOAuthLogin(String email, String name);
-
-    UserResponse getProfile();
-
-    List<UserResponse> getAllUsers();
-
-    void updateRole(String id, Role newRole);
 
     boolean existsByEmail(String email);
 }

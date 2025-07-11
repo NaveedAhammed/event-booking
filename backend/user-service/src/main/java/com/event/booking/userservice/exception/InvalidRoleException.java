@@ -1,7 +1,10 @@
 package com.event.booking.userservice.exception;
 
-public class InvalidRoleException extends RuntimeException{
+import com.event.booking.userservice.exception.enums.ExceptionCode;
+import org.springframework.http.HttpStatus;
+
+public class InvalidRoleException extends UserServiceException {
     public InvalidRoleException(String message){
-        super(message);
+        super(ExceptionCode.INVALID_ROLE, message, HttpStatus.FORBIDDEN);
     }
 }

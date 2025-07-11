@@ -1,9 +1,7 @@
 package com.event.booking.userservice.service;
 
-import com.event.booking.userservice.dto.AuthResponse;
 import com.event.booking.userservice.dto.LoginRequest;
 import com.event.booking.userservice.dto.RegisterRequest;
-import com.event.booking.userservice.dto.UserResponse;
 import com.event.booking.userservice.exception.InvalidCredentials;
 import com.event.booking.userservice.exception.UserAlreadyExistsException;
 import com.event.booking.userservice.exception.UserNotFoundException;
@@ -12,14 +10,21 @@ import com.event.booking.userservice.model.User;
 import com.event.booking.userservice.model.enums.AuthProvider;
 import com.event.booking.userservice.model.enums.Role;
 import com.event.booking.userservice.repository.UserRepository;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.event.booking.userservice.constant.Constants.*;
@@ -34,6 +39,20 @@ public class UserServiceImpl implements UserService{
     private final JwtService jwtService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final RestTemplate restTemplate;
+
+    @Value("${google.client-id}")
+    private String GOOGLE_CLIENT_ID;
+
+    @Value("${google.client-secret}")
+    private String GOOGLE_CLIENT_SECRET;
+
+    @Value("${backend.redirect.url}")
+    private String REDIRECT_URI;
+
+    @Value("${google.apis.token.url}")
+    private String GOOGLE_APIS_TOKEN_URL;
 
     @Override
     public Map<String, String> register(RegisterRequest request) {
@@ -67,7 +86,26 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Map<String, String> oAuth(String email, String name) {
+    public Map<String, String> oAuth(String code) {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("code", code);
+        params.add("client_id", GOOGLE_CLIENT_ID);
+        params.add("client_secret", GOOGLE_CLIENT_SECRET);
+        params.add("redirect_uri", REDIRECT_URI);
+        params.add("grant_type", "authorization_code");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+
+        ResponseEntity<Map> tokenResponse = restTemplate.postForEntity(GOOGLE_APIS_TOKEN_URL, request, Map.class);
+
+        String idToken = (String) tokenResponse.getBody().get("id_token");
+
+        GoogleIdToken.Payload payload = jwtService.verifyGoogleToken(idToken);
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
         User user = userRepository.findByEmail(email).orElse(null);
 
         if(user == null){
@@ -92,26 +130,6 @@ public class UserServiceImpl implements UserService{
             return jwtService.generateToken(user, false);
         }
         return null;
-    }
-
-    @Override
-    public UserResponse processOAuthLogin(String email, String name) {
-        return null;
-    }
-
-    @Override
-    public UserResponse getProfile() {
-        return null;
-    }
-
-    @Override
-    public List<UserResponse> getAllUsers() {
-        return List.of();
-    }
-
-    @Override
-    public void updateRole(String id, Role newRole) {
-
     }
 
     @Override

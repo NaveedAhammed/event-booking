@@ -1,7 +1,10 @@
 package com.event.booking.userservice.exception;
 
-public class InvalidTokenException extends RuntimeException{
+import com.event.booking.userservice.exception.enums.ExceptionCode;
+import org.springframework.http.HttpStatus;
+
+public class InvalidTokenException extends UserServiceException {
     public InvalidTokenException(String message){
-        super(message);
+        super(ExceptionCode.INVALID_TOKEN, message, HttpStatus.UNAUTHORIZED);
     }
 }

@@ -1,7 +1,10 @@
 package com.event.booking.userservice.exception;
 
-public class UserAlreadyExistsException extends RuntimeException{
+import com.event.booking.userservice.exception.enums.ExceptionCode;
+import org.springframework.http.HttpStatus;
+
+public class UserAlreadyExistsException extends UserServiceException {
     public UserAlreadyExistsException(String message){
-        super(message);
+        super(ExceptionCode.USER_ALREADY_EXISTS, message, HttpStatus.CONFLICT);
     }
 }

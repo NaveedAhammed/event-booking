@@ -1,7 +1,10 @@
 package com.event.booking.userservice.exception;
 
-public class InvalidCredentials extends RuntimeException{
+import com.event.booking.userservice.exception.enums.ExceptionCode;
+import org.springframework.http.HttpStatus;
+
+public class InvalidCredentials extends UserServiceException {
     public InvalidCredentials(String message){
-        super(message);
+        super(ExceptionCode.INVALID_CREDENTIALS, message, HttpStatus.UNAUTHORIZED);
     }
 }
