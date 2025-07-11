@@ -6,4 +6,6 @@ target/
 # Ignore application secrets
 application.properties
 
+
 node_modules
+frontend/.env

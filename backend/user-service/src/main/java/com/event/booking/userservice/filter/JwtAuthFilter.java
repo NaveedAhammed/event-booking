@@ -29,7 +29,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static final List<String> PUBLIC_URLS = List.of(
             "/api/auth/register",
-            "/api/auth/login"
+            "/api/auth/login",
+            "/api/auth/oauth/google/callback",
+            "/favicon.ico",
+            "/api/auth/refresh"
     );
 
     private final JwtService jwtService;
@@ -51,9 +54,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             String token = jwtService.getJwtFromHeader(request);
 
-            if (SecurityContextHolder.getContext().getAuthentication() == null && jwtService.validateJwtToken(token)) {
-                String email = jwtService.extractUsername(token);
-                String role = jwtService.extractRole(token);
+            if (SecurityContextHolder.getContext().getAuthentication() == null && jwtService.validateJwtToken(token, false)) {
+                String email = jwtService.extractUsername(token, false);
+                String role = jwtService.extractRole(token, false);
 
                 GrantedAuthority authority = new SimpleGrantedAuthority(role);
 

@@ -2,6 +2,10 @@ package com.event.booking.userservice.service;
 
 import com.event.booking.userservice.exception.InvalidTokenException;
 import com.event.booking.userservice.model.User;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -11,8 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -21,13 +28,43 @@ import static com.event.booking.userservice.constant.Constants.*;
 @Slf4j
 @Service
 public class JwtService {
-    @Value("${jwt.secret}")
-    private String JWT_SECRET;
+    @Value("${jwt.access.token.secret}")
+    private String ACCESS_SECRET;
 
-    @Value("${jwt.expiration}")
-    private long JWT_EXPIRATION;
+    @Value("${jwt.refresh.token.secret}")
+    private String REFRESH_SECRET;
+
+    @Value("${jwt.access.token.expiration}")
+    private long ACCESS_EXPIRATION;
+
+    @Value("${jwt.refresh.token.expiration}")
+    private long REFRESH_EXPIRATION;
 
     private Key cachedKey;
+
+    private final GoogleIdTokenVerifier verifier;
+
+    public JwtService(
+            @Value("${google.client-id}") String GOOGLE_CLIENT_ID
+    ) throws GeneralSecurityException, IOException {
+        this.verifier = new GoogleIdTokenVerifier.Builder(
+                GoogleNetHttpTransport.newTrustedTransport(),
+                GsonFactory.getDefaultInstance())
+                .setAudience(Collections.singletonList(GOOGLE_CLIENT_ID))
+                .build();
+    }
+
+    public GoogleIdToken.Payload verifyGoogleToken(String idTokenString) {
+        try {
+            GoogleIdToken idToken = verifier.verify(idTokenString);
+            if (idToken == null){
+                throw new RuntimeException("Invalid token");
+            }
+            return idToken.getPayload();
+        }catch (Exception e) {
+            throw new RuntimeException("Token verification failed", e);
+        }
+    }
 
     public String getJwtFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
@@ -40,32 +77,34 @@ public class JwtService {
         return null;
     }
 
-    public String generateToken(User user) {
+    public String generateToken(User user, boolean isRefreshToken) {
+        long expiration = isRefreshToken ? REFRESH_EXPIRATION : ACCESS_EXPIRATION;
+
         return Jwts.builder()
                 .claim(ROLE, user.getRole().name())
                 .subject(user.getEmail())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
-                .signWith(key())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(key(isRefreshToken))
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public String extractUsername(String token, boolean isRefreshToken) {
+        return extractClaim(token, Claims::getSubject, isRefreshToken);
     }
 
-    public String extractRole(String token) {
-        return extractClaim(token, claims -> claims.get("role", String.class));
+    public String extractRole(String token, boolean isRefreshToken) {
+        return extractClaim(token, claims -> claims.get("role", String.class), isRefreshToken);
     }
 
-    public boolean validateJwtToken(String token) {
+    public boolean validateJwtToken(String token, boolean isRefreshToken) {
         try {
             log.info("Validating token: {}", token);
 
             if (token == null) throw new InvalidTokenException(INVALID_JWT_TOKEN);
 
             Jwts.parser()
-                    .verifyWith((SecretKey) key())
+                    .verifyWith((SecretKey) key(isRefreshToken))
                     .build()
                     .parseSignedClaims(token);
             return true;
@@ -75,18 +114,19 @@ public class JwtService {
         }
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver, boolean isRefreshToken) {
         Claims claims = Jwts.parser()
-                .verifyWith((SecretKey) key())
+                .verifyWith((SecretKey) key(isRefreshToken))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
         return claimsResolver.apply(claims);
     }
 
-    private Key key() {
+    private Key key(boolean isRefreshToken) {
+        String secret = isRefreshToken ? REFRESH_SECRET : ACCESS_SECRET;
         if (cachedKey == null) {
-            cachedKey = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
+            cachedKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         }
         return cachedKey;
     }

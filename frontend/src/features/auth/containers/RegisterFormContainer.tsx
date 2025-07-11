@@ -4,6 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import authService from "../services/authService";
 import RegisterForm from "../components/RegisterForm";
 import { registerSchema, type RegisterSchema } from "../schema/registerSchema";
+import Button from "@/components/Button/Button";
+import { FcGoogle } from "react-icons/fc";
+import { FaGithub } from "react-icons/fa";
 
 const RegisterFormContainer = () => {
 	const navigate = useNavigate();
@@ -28,8 +31,19 @@ const RegisterFormContainer = () => {
 		}
 	};
 
+	const googleOAuthHandler = () => {
+		const redirectUri = encodeURIComponent(
+			"http://localhost:4000/api/auth/oauth/google/callback"
+		);
+		const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+		const scope = encodeURIComponent("openid email profile");
+		const state = "tnAMUf0fuZb6-Bqm";
+
+		window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&prompt=select_account`;
+	};
+
 	return (
-		<div className="flex items-center justify-center py-2">
+		<div className="py-10 flex flex-col">
 			<RegisterForm
 				onSubmit={handleSubmit(onSubmit)}
 				register={register}
@@ -38,6 +52,26 @@ const RegisterFormContainer = () => {
 				watch={watch}
 				setValue={setValue}
 			/>
+
+			<div className="border-t border-gray-200 mt-6 relative">
+				<span className="text-gray-400 text-xs absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-55%] bg-white px-2">
+					or you can sign in with
+				</span>
+			</div>
+
+			<Button
+				variant="outline"
+				className="gap-2 text-sm mt-6"
+				onClick={googleOAuthHandler}
+			>
+				<FcGoogle size={20} />
+				<span>Continue with Google</span>
+			</Button>
+
+			<Button variant="outline" className="gap-2 text-sm mt-4">
+				<FaGithub size={20} />
+				<span>Continue with GitHub</span>
+			</Button>
 		</div>
 	);
 };

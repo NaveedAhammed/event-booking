@@ -9,6 +9,7 @@ import com.event.booking.userservice.exception.UserAlreadyExistsException;
 import com.event.booking.userservice.exception.UserNotFoundException;
 import com.event.booking.userservice.mapper.UserMapper;
 import com.event.booking.userservice.model.User;
+import com.event.booking.userservice.model.enums.AuthProvider;
 import com.event.booking.userservice.model.enums.Role;
 import com.event.booking.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.event.booking.userservice.constant.Constants.*;
 
@@ -32,7 +36,7 @@ public class UserServiceImpl implements UserService{
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public AuthResponse register(RegisterRequest request) {
+    public Map<String, String> register(RegisterRequest request) {
         String email = request.getEmail();
         if (existsByEmail(email)){
             log.error(USER_ALREADY_EXISTS_WITH_EMAIL + COLON + CURLY_PLACEHOLDER, email);
@@ -43,15 +47,13 @@ public class UserServiceImpl implements UserService{
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user = userRepository.save(user);
 
-        String token = jwtService.generateToken(user);
-
         log.info("New user registered with email: {}", user.getEmail());
 
-        return UserMapper.toAuthResponse(user, token);
+        return generateTokens(user);
     }
 
     @Override
-    public AuthResponse login(LoginRequest request) {
+    public Map<String, String> login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_WITH_EMAIL + request.getEmail()));
 
@@ -59,11 +61,37 @@ public class UserServiceImpl implements UserService{
             throw new InvalidCredentials(INVALID_CREDENTIALS);
         }
 
-        String token = jwtService.generateToken(user);
-
         log.info("Login successful for user: {}", user.getEmail());
 
-        return UserMapper.toAuthResponse(user, token);
+        return generateTokens(user);
+    }
+
+    @Override
+    public Map<String, String> oAuth(String email, String name) {
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if(user == null){
+            user = new User();
+            user.setName(name);
+            user.setEmail(email);
+            user.setAuthProvider(AuthProvider.GOOGLE);
+            user.setRole(Role.USER);
+            user = userRepository.save(user);
+        }
+
+        return generateTokens(user);
+    }
+
+    @Override
+    public String refresh(String refreshToken) {
+        if (jwtService.validateJwtToken(refreshToken, true)){
+            String email = jwtService.extractUsername(refreshToken, true);
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_WITH_EMAIL + email));
+
+            return jwtService.generateToken(user, false);
+        }
+        return null;
     }
 
     @Override
@@ -89,5 +117,16 @@ public class UserServiceImpl implements UserService{
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    private Map<String, String> generateTokens(User user) {
+        String accessToken = jwtService.generateToken(user, false);
+        String refreshToken = jwtService.generateToken(user, true);
+
+        Map<String, String> map = new HashMap<>();
+        map.put("access_token", accessToken);
+        map.put("refresh_token", refreshToken);
+
+        return map;
     }
 }
