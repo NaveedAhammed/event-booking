@@ -73,10 +73,15 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public Map<String, String> login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_WITH_EMAIL + request.getEmail()));
+        String email = request.getEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error(USER_NOT_FOUND_WITH_EMAIL + COLON + CURLY_PLACEHOLDER, email);
+                    return new UserNotFoundException(USER_NOT_FOUND_WITH_EMAIL + email);
+                });
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            log.error(INVALID_CREDENTIALS);
             throw new InvalidCredentials(INVALID_CREDENTIALS);
         }
 
@@ -99,7 +104,11 @@ public class UserServiceImpl implements UserService{
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
+        log.info("Google token request: {}", request);
+
         ResponseEntity<Map> tokenResponse = restTemplate.postForEntity(GOOGLE_APIS_TOKEN_URL, request, Map.class);
+
+        log.info("Google token response: {}", tokenResponse);
 
         String idToken = (String) tokenResponse.getBody().get("id_token");
 

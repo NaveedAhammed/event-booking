@@ -15,7 +15,7 @@ public enum Role {
         this.value = value;
     }
 
-    private static Role fromValue(String value){
+    public static Role fromValue(String value){
         return Arrays.stream(values())
                 .filter(role -> role.value.equalsIgnoreCase(value))
                 .findFirst()

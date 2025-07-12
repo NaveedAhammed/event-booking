@@ -34,6 +34,8 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest request,
             HttpServletResponse response
     ) {
+        log.info("RegisterRequest: {}", request);
+
         Map<String, String> tokens = userService.register(request);
 
         setRefreshTokenCookie(response, tokens.get("refresh_token"));
@@ -43,6 +45,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> loginUser(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+        log.info("LoginRequest: {}", request);
+
         Map<String, String> tokens = userService.login(request);
 
         setRefreshTokenCookie(response,tokens.get("refresh_token"));
@@ -52,6 +56,8 @@ public class AuthController {
 
     @GetMapping("/oauth/google/callback")
     public void handleGoogleCallback(@RequestParam String code, HttpServletResponse response) throws IOException {
+        log.info("Google oauth code: {}", code);
+
         Map<String, String> tokens = userService.oAuth(code);
 
         setRefreshTokenCookie(response, tokens.get("refresh_token"));
@@ -72,5 +78,7 @@ public class AuthController {
         cookie.setPath("/");
 
         response.addCookie(cookie);
+
+        log.info("Added refresh_token cookie");
     }
 }

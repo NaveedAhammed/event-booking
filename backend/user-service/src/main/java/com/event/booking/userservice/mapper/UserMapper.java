@@ -25,7 +25,7 @@ public class UserMapper {
         return User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
-                .role(Role.valueOf(request.getRole()))
+                .role(Role.fromValue(request.getRole()))
                 .authProvider(AuthProvider.LOCAL)
                 .build();
     }
