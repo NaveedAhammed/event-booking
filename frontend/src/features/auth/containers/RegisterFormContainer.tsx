@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,11 +34,11 @@ const RegisterFormContainer = () => {
 
 	const googleOAuthHandler = () => {
 		const redirectUri = encodeURIComponent(
-			"http://localhost:4000/api/auth/oauth/google/callback"
+			"http://localhost:4000/api/auth/oauth/google"
 		);
 		const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 		const scope = encodeURIComponent("openid email profile");
-		const state = "tnAMUf0fuZb6-Bqm";
+		const state = uuid();
 
 		window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&prompt=select_account`;
 	};

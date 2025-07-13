@@ -5,6 +5,8 @@ import com.event.booking.userservice.dto.RegisterRequest;
 import com.event.booking.userservice.exception.InvalidCredentials;
 import com.event.booking.userservice.exception.UserAlreadyExistsException;
 import com.event.booking.userservice.exception.UserNotFoundException;
+import com.event.booking.userservice.exception.UserServiceException;
+import com.event.booking.userservice.exception.enums.ExceptionCode;
 import com.event.booking.userservice.mapper.UserMapper;
 import com.event.booking.userservice.model.User;
 import com.event.booking.userservice.model.enums.AuthProvider;
@@ -14,10 +16,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -107,6 +106,10 @@ public class UserServiceImpl implements UserService{
         log.info("Google token request: {}", request);
 
         ResponseEntity<Map> tokenResponse = restTemplate.postForEntity(GOOGLE_APIS_TOKEN_URL, request, Map.class);
+
+        if (tokenResponse.getBody() == null) {
+            throw new UserServiceException(ExceptionCode.INTERNAL_SERVICE_ERROR, INTERNAL_SERVICE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         log.info("Google token response: {}", tokenResponse);
 

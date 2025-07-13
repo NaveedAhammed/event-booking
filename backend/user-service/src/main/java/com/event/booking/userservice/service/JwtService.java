@@ -1,6 +1,8 @@
 package com.event.booking.userservice.service;
 
 import com.event.booking.userservice.exception.InvalidTokenException;
+import com.event.booking.userservice.exception.UserServiceException;
+import com.event.booking.userservice.exception.enums.ExceptionCode;
 import com.event.booking.userservice.model.User;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -12,6 +14,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -58,11 +61,13 @@ public class JwtService {
         try {
             GoogleIdToken idToken = verifier.verify(idTokenString);
             if (idToken == null){
-                throw new RuntimeException("Invalid token");
+                log.error("Null idToken");
+                throw new UserServiceException(ExceptionCode.INTERNAL_SERVICE_ERROR,INTERNAL_SERVICE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
             }
             return idToken.getPayload();
         }catch (Exception e) {
-            throw new RuntimeException("Token verification failed", e);
+            log.error("Token verification failed: {}", e.getMessage());
+            throw new UserServiceException(ExceptionCode.INTERNAL_SERVICE_ERROR,INTERNAL_SERVICE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

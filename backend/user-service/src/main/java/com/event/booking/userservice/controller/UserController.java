@@ -2,7 +2,6 @@ package com.event.booking.userservice.controller;
 
 import com.event.booking.userservice.dto.LoginRequest;
 import com.event.booking.userservice.dto.RegisterRequest;
-import com.event.booking.userservice.service.JwtService;
 import com.event.booking.userservice.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.Map;
@@ -21,7 +19,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class UserController {
 
     private final UserService userService;
 
@@ -54,8 +52,8 @@ public class AuthController {
         return new ResponseEntity<>(Map.of("access_token", tokens.get("access_token")), HttpStatus.OK);
     }
 
-    @GetMapping("/oauth/google/callback")
-    public void handleGoogleCallback(@RequestParam String code, HttpServletResponse response) throws IOException {
+    @GetMapping("/oauth/google")
+    public void handleGoogleOAuth(@RequestParam String code, HttpServletResponse response) throws IOException {
         log.info("Google oauth code: {}", code);
 
         Map<String, String> tokens = userService.oAuth(code);
