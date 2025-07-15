@@ -41,6 +41,9 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Column(unique = true)
+    private String mobile;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

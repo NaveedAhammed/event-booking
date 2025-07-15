@@ -9,4 +9,6 @@ public final class Constants {
     public final static String ROLE = "role";
     public final static String INVALID_CREDENTIALS = "Invalid email or password";
     public final static String INTERNAL_SERVICE_ERROR = "Internal service error";
+    public final static String NO_USER_REGISTERED_WITH_MOBILE = "No user registered with mobile";
+    public final static String INVALID_OTP = "Invalid otp";
 }

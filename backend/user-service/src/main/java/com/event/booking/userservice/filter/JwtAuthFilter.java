@@ -32,7 +32,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/auth/login",
             "/api/auth/oauth/google/callback",
             "/favicon.ico",
-            "/api/auth/refresh"
+            "/api/auth/refresh",
+            "/api/auth/send-otp",
+            "/api/auth/verify-otp"
     );
 
     private final JwtService jwtService;

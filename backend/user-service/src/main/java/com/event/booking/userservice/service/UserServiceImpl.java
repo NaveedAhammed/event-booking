@@ -1,11 +1,9 @@
 package com.event.booking.userservice.service;
 
 import com.event.booking.userservice.dto.LoginRequest;
+import com.event.booking.userservice.dto.OtpVerifyRequest;
 import com.event.booking.userservice.dto.RegisterRequest;
-import com.event.booking.userservice.exception.InvalidCredentials;
-import com.event.booking.userservice.exception.UserAlreadyExistsException;
-import com.event.booking.userservice.exception.UserNotFoundException;
-import com.event.booking.userservice.exception.UserServiceException;
+import com.event.booking.userservice.exception.*;
 import com.event.booking.userservice.exception.enums.ExceptionCode;
 import com.event.booking.userservice.mapper.UserMapper;
 import com.event.booking.userservice.model.User;
@@ -40,6 +38,8 @@ public class UserServiceImpl implements UserService{
     private final PasswordEncoder passwordEncoder;
 
     private final RestTemplate restTemplate;
+
+    private final OtpService otpService;
 
     @Value("${google.client-id}")
     private String GOOGLE_CLIENT_ID;
@@ -147,6 +147,34 @@ public class UserServiceImpl implements UserService{
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public void sendOtp(String mobile) {
+        if (!userRepository.existsByMobile(mobile)){
+            log.error(NO_USER_REGISTERED_WITH_MOBILE + COLON + CURLY_PLACEHOLDER, mobile);
+            throw new UserNotFoundException(NO_USER_REGISTERED_WITH_MOBILE + COLON + mobile);
+        }
+
+        otpService.generateAndStoreOtp(mobile);
+    }
+
+    @Override
+    public Map<String, String> verifyOtp(OtpVerifyRequest request) {
+        boolean valid = otpService.validateOtp(request.getMobile(), request.getOtp());
+
+        if (!valid) {
+            log.error(INVALID_OTP + COLON + CURLY_PLACEHOLDER, request.getOtp());
+            throw new InvalidOtpException(ExceptionCode.INVALID_OTP, INVALID_OTP, HttpStatus.UNAUTHORIZED);
+        }
+
+        User user = userRepository.findByMobile(request.getMobile())
+                .orElseThrow(() -> {
+                    log.error(NO_USER_REGISTERED_WITH_MOBILE + COLON + CURLY_PLACEHOLDER, request.getMobile());
+                    return new UserNotFoundException(NO_USER_REGISTERED_WITH_MOBILE + COLON + request.getMobile());
+                });
+
+        return generateTokens(user);
     }
 
     private Map<String, String> generateTokens(User user) {

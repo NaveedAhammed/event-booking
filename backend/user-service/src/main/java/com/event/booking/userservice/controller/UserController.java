@@ -1,7 +1,10 @@
 package com.event.booking.userservice.controller;
 
 import com.event.booking.userservice.dto.LoginRequest;
+import com.event.booking.userservice.dto.OtpRequest;
+import com.event.booking.userservice.dto.OtpVerifyRequest;
 import com.event.booking.userservice.dto.RegisterRequest;
+import com.event.booking.userservice.service.OtpService;
 import com.event.booking.userservice.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -67,6 +70,23 @@ public class UserController {
     public ResponseEntity<Map<String, String>> refresh(@CookieValue("refresh_token") String refreshToken){
         String accessToken = userService.refresh(refreshToken);
         return ResponseEntity.ok(Map.of("access_token", accessToken));
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<Void> sendOtp(@Valid @RequestBody OtpRequest request){
+        userService.sendOtp(request.getMobile());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<Map<String, String>> verifyOtpAndLogin(@Valid @RequestBody OtpVerifyRequest request, HttpServletResponse response) {
+        log.info("OtpVerifyRequest: {}", request);
+
+        Map<String, String> tokens = userService.verifyOtp(request);
+
+        setRefreshTokenCookie(response,tokens.get("refresh_token"));
+
+        return new ResponseEntity<>(Map.of("access_token", tokens.get("access_token")), HttpStatus.OK);
     }
 
     private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken){

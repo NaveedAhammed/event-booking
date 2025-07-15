@@ -1,9 +1,6 @@
 package com.event.booking.userservice.service;
 
-import com.event.booking.userservice.dto.AuthResponse;
-import com.event.booking.userservice.dto.LoginRequest;
-import com.event.booking.userservice.dto.RegisterRequest;
-import com.event.booking.userservice.dto.UserResponse;
+import com.event.booking.userservice.dto.*;
 import com.event.booking.userservice.model.User;
 import com.event.booking.userservice.model.enums.Role;
 
@@ -20,4 +17,8 @@ public interface UserService {
     String refresh(String refreshToken);
 
     boolean existsByEmail(String email);
+
+    void sendOtp(String mobile);
+
+    Map<String, String> verifyOtp(OtpVerifyRequest request);
 }

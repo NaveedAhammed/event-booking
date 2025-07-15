@@ -6,5 +6,6 @@ public enum ExceptionCode {
     INVALID_ROLE,
     INVALID_TOKEN,
     USER_ALREADY_EXISTS,
+    INVALID_OTP,
     INTERNAL_SERVICE_ERROR;
 }
