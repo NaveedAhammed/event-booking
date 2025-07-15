@@ -8,8 +8,8 @@ import { registerSchema, type RegisterSchema } from "../schema/registerSchema";
 import Button from "@/components/Button/Button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
-import { AxiosError } from "axios";
 import toast from "react-hot-toast";
+import { getErrorMessage } from "@/utils/helpers";
 
 const RegisterFormContainer = () => {
 	const navigate = useNavigate();
@@ -22,17 +22,12 @@ const RegisterFormContainer = () => {
 	});
 
 	const onSubmit = async (data: RegisterSchema) => {
-		console.log(data);
-
 		try {
-			const res = await authService.register(data);
-			console.log(res);
-
-			navigate("/");
+			await authService.register(data);
+			navigate("/", { replace: true });
 		} catch (error) {
-			if (error instanceof AxiosError) {
-				toast.error(error.message);
-			}
+			const message = getErrorMessage(error);
+			toast.error(message);
 		}
 	};
 

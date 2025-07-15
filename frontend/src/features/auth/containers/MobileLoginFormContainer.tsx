@@ -12,20 +12,13 @@ import MobileLoginForm from "../components/MobileLoginForm";
 import { useEffect, useReducer } from "react";
 import authService from "../services/authService";
 import { useNavigate } from "react-router-dom";
-import { AxiosError } from "axios";
 import toast from "react-hot-toast";
+import { getErrorMessage } from "@/utils/helpers";
 
 type Action =
-	| { type: "sendOtpStart" }
 	| { type: "sendOtpSuccess" }
-	| { type: "sendOtpError"; payload: string }
-	| { type: "otpVerifyStart" }
-	| { type: "otpVerifySuccess" }
-	| { type: "otpVerifyError"; payload: string }
 	| { type: "decrementTimer" }
 	| { type: "reset" }
-	| { type: "updateMobile"; payload: string }
-	| { type: "updateOtp"; payload: string }
 	| { type: "resendCode" };
 
 interface State {
@@ -72,6 +65,7 @@ const MobileLoginFormContainer = () => {
 		handleSubmit,
 		register,
 		setError,
+		getValues,
 		formState: { errors, isSubmitting },
 	} = useForm<MobileLoginSchema>({
 		resolver: zodResolver(mobileLoginSchema),
@@ -87,9 +81,8 @@ const MobileLoginFormContainer = () => {
 			await authService.getOtp(mobile);
 			dispatch({ type: "sendOtpSuccess" });
 		} catch (error) {
-			if (error instanceof AxiosError) {
-				toast.error(error.message);
-			}
+			const message = getErrorMessage(error);
+			toast.error(message);
 		}
 	};
 
@@ -109,15 +102,15 @@ const MobileLoginFormContainer = () => {
 
 		try {
 			await authService.verifyOtp(data);
+			navigate("/", { replace: true });
 		} catch (error) {
-			if (error instanceof AxiosError) {
-				toast.error(error.message);
-			}
+			const message = getErrorMessage(error);
+			toast.error(message);
 		}
 	};
 
-	const requestNewCodeHandler = () => {
-		dispatch({ type: "resendCode" });
+	const requestNewCodeHandler = async () => {
+		await getOtp(getValues().mobile);
 	};
 
 	useEffect(() => {

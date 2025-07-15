@@ -9,7 +9,7 @@ import EmailLoginForm from "../components/EmailLoginForm";
 import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 import toast from "react-hot-toast";
-import { AxiosError } from "axios";
+import { getErrorMessage } from "@/utils/helpers";
 
 const EmailLoginFormContainer = () => {
 	const navigate = useNavigate();
@@ -29,9 +29,8 @@ const EmailLoginFormContainer = () => {
 				navigate("/", { replace: true });
 			}
 		} catch (error) {
-			if (error instanceof AxiosError) {
-				toast.error(error.message);
-			}
+			const message = getErrorMessage(error);
+			toast.error(message);
 		}
 	};
 

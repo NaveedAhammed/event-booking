@@ -11,4 +11,5 @@ public final class Constants {
     public final static String INTERNAL_SERVICE_ERROR = "Internal service error";
     public final static String NO_USER_REGISTERED_WITH_MOBILE = "No user registered with mobile";
     public final static String INVALID_OTP = "Invalid otp";
+    public final static String FAILED_TO_SEND_OTP = "Failed to send OTP";
 }

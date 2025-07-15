@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     log.error(USER_NOT_FOUND_WITH_EMAIL + COLON + CURLY_PLACEHOLDER, email);
-                    return new UserNotFoundException(USER_NOT_FOUND_WITH_EMAIL + email);
+                    return new UserNotFoundException(USER_NOT_FOUND_WITH_EMAIL + COLON + email);
                 });
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
@@ -151,12 +151,11 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void sendOtp(String mobile) {
-        if (!userRepository.existsByMobile(mobile)){
-            log.error(NO_USER_REGISTERED_WITH_MOBILE + COLON + CURLY_PLACEHOLDER, mobile);
-            throw new UserNotFoundException(NO_USER_REGISTERED_WITH_MOBILE + COLON + mobile);
-        }
+        User user = findByMobile(mobile);
 
-        otpService.generateAndStoreOtp(mobile);
+        String otp = otpService.generateAndStoreOtp(mobile);
+
+        otpService.sendOtp(mobile, otp, user.getEmail());
     }
 
     @Override
@@ -168,11 +167,7 @@ public class UserServiceImpl implements UserService{
             throw new InvalidOtpException(ExceptionCode.INVALID_OTP, INVALID_OTP, HttpStatus.UNAUTHORIZED);
         }
 
-        User user = userRepository.findByMobile(request.getMobile())
-                .orElseThrow(() -> {
-                    log.error(NO_USER_REGISTERED_WITH_MOBILE + COLON + CURLY_PLACEHOLDER, request.getMobile());
-                    return new UserNotFoundException(NO_USER_REGISTERED_WITH_MOBILE + COLON + request.getMobile());
-                });
+        User user = findByMobile(request.getMobile());
 
         return generateTokens(user);
     }
@@ -186,5 +181,13 @@ public class UserServiceImpl implements UserService{
         map.put("refresh_token", refreshToken);
 
         return map;
+    }
+
+    private User findByMobile(String mobile) {
+        return userRepository.findByMobile(mobile)
+                .orElseThrow(() -> {
+                    log.error(NO_USER_REGISTERED_WITH_MOBILE + COLON + CURLY_PLACEHOLDER, mobile);
+                    return new UserNotFoundException(NO_USER_REGISTERED_WITH_MOBILE + COLON + mobile);
+                });
     }
 }
