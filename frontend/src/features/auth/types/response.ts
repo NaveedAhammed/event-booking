@@ -6,8 +6,3 @@ export interface UserResponse {
 	authProvider: string;
 	createdAt: string;
 }
-
-export interface AuthResponse {
-	token: string;
-	userResponse: UserResponse;
-}

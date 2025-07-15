@@ -1,41 +1,32 @@
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { type LoginSchema, loginSchema } from "../schema/loginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import LoginForm from "../components/LoginForm";
-import authService from "../services/authService";
 import Button from "@/components/Button/Button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { MdOutlinePhoneIphone } from "react-icons/md";
+import { emailLoginSchema, type EmailLoginSchema } from "../schema/loginSchema";
+import EmailLoginForm from "../components/EmailLoginForm";
 
-const LoginFormContainer = () => {
-	const navigate = useNavigate();
+const EmailLoginFormContainer = () => {
 	const {
 		handleSubmit,
 		register,
 		formState: { errors, isSubmitting },
-	} = useForm<LoginSchema>({
-		resolver: zodResolver(loginSchema),
+	} = useForm<EmailLoginSchema>({
+		resolver: zodResolver(emailLoginSchema),
 	});
 
-	const onSubmit = async (data: LoginSchema) => {
-		try {
-			const res = await authService.login(data);
-			console.log("Logged in: ", res);
-
-			navigate("/");
-		} catch (err) {
-			console.log("Login error:", err);
-		}
+	const onSubmit = async (data: EmailLoginSchema) => {
+		console.log(data);
 	};
 
 	return (
 		<div className="py-10 flex flex-col">
-			<LoginForm
-				onSubmit={handleSubmit(onSubmit)}
+			<EmailLoginForm
 				register={register}
 				errors={errors}
 				isSubmitting={isSubmitting}
+				onSubmit={handleSubmit(onSubmit)}
 			/>
 
 			<div className="border-t border-gray-200 mt-6 relative">
@@ -45,6 +36,11 @@ const LoginFormContainer = () => {
 			</div>
 
 			<Button variant="outline" className="gap-2 text-sm mt-6">
+				<MdOutlinePhoneIphone size={20} />
+				<span>Continue with Phone</span>
+			</Button>
+
+			<Button variant="outline" className="gap-2 text-sm mt-4">
 				<FcGoogle size={20} />
 				<span>Continue with Google</span>
 			</Button>
@@ -57,4 +53,4 @@ const LoginFormContainer = () => {
 	);
 };
 
-export default LoginFormContainer;
+export default EmailLoginFormContainer;

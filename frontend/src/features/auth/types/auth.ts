@@ -9,3 +9,8 @@ export interface RegisterRequest {
 	password: string;
 	role: string;
 }
+
+export interface OtpVerifyRequest {
+	mobile?: string;
+	otp?: string;
+}

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const loginSchema = z.object({
+export const emailLoginSchema = z.object({
 	email: z
 		.string()
 		.nonempty({ message: "Email is required" })
@@ -8,4 +8,11 @@ export const loginSchema = z.object({
 	password: z.string().nonempty({ message: "Password is required" }),
 });
 
-export type LoginSchema = z.infer<typeof loginSchema>;
+export type EmailLoginSchema = z.infer<typeof emailLoginSchema>;
+
+export const mobileLoginSchema = z.object({
+	mobile: z.string().nonempty({ message: "Mobile number is required" }),
+	otp: z.string().optional(),
+});
+
+export type MobileLoginSchema = z.infer<typeof mobileLoginSchema>;

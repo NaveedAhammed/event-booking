@@ -1,26 +1,26 @@
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
-import type { LoginSchema } from "../schema/loginSchema";
+import type { EmailLoginSchema } from "../schema/loginSchema";
 import InputField from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import { LuLockKeyhole, LuMail } from "react-icons/lu";
 import { HiOutlineEyeOff } from "react-icons/hi";
+import Heading from "@/components/Heading/Heading";
 
 interface Props {
 	onSubmit: () => void;
-	register: UseFormRegister<LoginSchema>;
-	errors: FieldErrors<LoginSchema>;
+	register: UseFormRegister<EmailLoginSchema>;
+	errors: FieldErrors<EmailLoginSchema>;
 	isSubmitting: boolean;
 }
 
-const LoginForm = ({ onSubmit, register, errors, isSubmitting }: Props) => {
+function EmailLoginForm({ onSubmit, register, errors, isSubmitting }: Props) {
 	return (
 		<form onSubmit={onSubmit} className="bg-white w-96 flex flex-col gap-4">
-			<h2 className="text-2xl font-semibold">Welcome Back!</h2>
-
-			<p className="text-sm text-gray-500 mb-4">
-				Login to your account to continue booking events and managing your
-				favorites.
-			</p>
+			<Heading
+				title="Welcome Back!"
+				subTitle="Login to your account to continue booking events and managing your
+				favorites."
+			/>
 
 			<InputField
 				leadingIcon={LuMail}
@@ -44,6 +44,6 @@ const LoginForm = ({ onSubmit, register, errors, isSubmitting }: Props) => {
 			</Button>
 		</form>
 	);
-};
+}
 
-export default LoginForm;
+export default EmailLoginForm;

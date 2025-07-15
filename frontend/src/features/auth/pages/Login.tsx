@@ -1,5 +1,5 @@
-import LoginFormContainer from "../containers/LoginFormContainer";
+import MobileLoginFormContainer from "../containers/MobileLoginFormContainer";
 
-const Login = () => <LoginFormContainer />;
+const Login = () => <MobileLoginFormContainer />;
 
 export default Login;
