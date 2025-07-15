@@ -8,6 +8,8 @@ import { registerSchema, type RegisterSchema } from "../schema/registerSchema";
 import Button from "@/components/Button/Button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { AxiosError } from "axios";
+import toast from "react-hot-toast";
 
 const RegisterFormContainer = () => {
 	const navigate = useNavigate();
@@ -15,20 +17,22 @@ const RegisterFormContainer = () => {
 		handleSubmit,
 		register,
 		formState: { errors, isSubmitting },
-		watch,
-		setValue,
 	} = useForm<RegisterSchema>({
 		resolver: zodResolver(registerSchema),
 	});
 
 	const onSubmit = async (data: RegisterSchema) => {
+		console.log(data);
+
 		try {
 			const res = await authService.register(data);
-			console.log("Registered: ", res);
+			console.log(res);
 
 			navigate("/");
-		} catch (err) {
-			console.log("Register error:", err);
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				toast.error(error.message);
+			}
 		}
 	};
 
@@ -50,8 +54,6 @@ const RegisterFormContainer = () => {
 				register={register}
 				errors={errors}
 				isSubmitting={isSubmitting}
-				watch={watch}
-				setValue={setValue}
 			/>
 
 			<div className="border-t border-gray-200 mt-6 relative">

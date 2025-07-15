@@ -6,8 +6,14 @@ import { FaGithub } from "react-icons/fa";
 import { MdOutlinePhoneIphone } from "react-icons/md";
 import { emailLoginSchema, type EmailLoginSchema } from "../schema/loginSchema";
 import EmailLoginForm from "../components/EmailLoginForm";
+import { useNavigate } from "react-router-dom";
+import authService from "../services/authService";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 const EmailLoginFormContainer = () => {
+	const navigate = useNavigate();
+
 	const {
 		handleSubmit,
 		register,
@@ -17,7 +23,16 @@ const EmailLoginFormContainer = () => {
 	});
 
 	const onSubmit = async (data: EmailLoginSchema) => {
-		console.log(data);
+		try {
+			const response = await authService.login(data);
+			if (response) {
+				navigate("/", { replace: true });
+			}
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				toast.error(error.message);
+			}
+		}
 	};
 
 	return (
@@ -26,7 +41,7 @@ const EmailLoginFormContainer = () => {
 				register={register}
 				errors={errors}
 				isSubmitting={isSubmitting}
-				onSubmit={handleSubmit(onSubmit)}
+				onSubmit={handleSubmit(onSubmit, (e) => console.log(e))}
 			/>
 
 			<div className="border-t border-gray-200 mt-6 relative">
@@ -35,7 +50,13 @@ const EmailLoginFormContainer = () => {
 				</span>
 			</div>
 
-			<Button variant="outline" className="gap-2 text-sm mt-6">
+			<Button
+				variant="outline"
+				className="gap-2 text-sm mt-6"
+				onClick={() =>
+					navigate("/login?mode=mobile", { replace: true })
+				}
+			>
 				<MdOutlinePhoneIphone size={20} />
 				<span>Continue with Phone</span>
 			</Button>

@@ -11,6 +11,9 @@ import { LuMail } from "react-icons/lu";
 import MobileLoginForm from "../components/MobileLoginForm";
 import { useEffect, useReducer } from "react";
 import authService from "../services/authService";
+import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+import toast from "react-hot-toast";
 
 type Action =
 	| { type: "sendOtpStart" }
@@ -26,18 +29,12 @@ type Action =
 	| { type: "resendCode" };
 
 interface State {
-	mobile: string;
-	otp: string;
-	status: "idle" | "loading" | "error";
 	showOtpComponent: boolean;
 	timer: number;
 	errorMessage?: string;
 }
 
 const initialState: State = {
-	mobile: "",
-	otp: "",
-	status: "idle",
 	showOtpComponent: false,
 	timer: 60,
 	errorMessage: undefined,
@@ -45,32 +42,14 @@ const initialState: State = {
 
 const reducer = (state: State, action: Action): State => {
 	switch (action.type) {
-		case "sendOtpStart":
-			return { ...state, status: "loading" };
 		case "sendOtpSuccess":
 			return {
 				...state,
-				status: "idle",
 				showOtpComponent: true,
 				timer: 60,
 			};
-		case "sendOtpError":
-			return { ...state, status: "error", errorMessage: action.payload };
-		case "otpVerifyStart":
-			return { ...state, status: "loading" };
-		case "otpVerifySuccess":
-			return {
-				...state,
-				status: "idle",
-			};
-		case "otpVerifyError":
-			return { ...state, status: "error", errorMessage: action.payload };
 		case "decrementTimer":
 			return { ...state, timer: state.timer - 1 };
-		case "updateMobile":
-			return { ...state, mobile: action.payload };
-		case "updateOtp":
-			return { ...state, otp: action.payload };
 		case "resendCode":
 			return { ...state, timer: 60 };
 		case "reset":
@@ -80,14 +59,19 @@ const reducer = (state: State, action: Action): State => {
 	}
 };
 
+const OTP_LENGTH = 6;
+
 const MobileLoginFormContainer = () => {
 	const [state, dispatch] = useReducer(reducer, initialState);
 
-	const { showOtpComponent, timer, mobile, otp } = state;
+	const navigate = useNavigate();
+
+	const { showOtpComponent, timer } = state;
 
 	const {
 		handleSubmit,
 		register,
+		setError,
 		formState: { errors, isSubmitting },
 	} = useForm<MobileLoginSchema>({
 		resolver: zodResolver(mobileLoginSchema),
@@ -95,43 +79,45 @@ const MobileLoginFormContainer = () => {
 
 	const onSubmit = async (data: MobileLoginSchema) => {
 		if (!showOtpComponent) return getOtp(data.mobile!);
-		else if (showOtpComponent) return verifyOtp({ mobile, otp });
+		else if (showOtpComponent) return verifyOtp(data);
 	};
 
 	const getOtp = async (mobile: string) => {
-		dispatch({ type: "sendOtpStart" });
 		try {
 			await authService.getOtp(mobile);
 			dispatch({ type: "sendOtpSuccess" });
-		} catch (err) {
-			console.log(err);
-			dispatch({ type: "sendOtpError", payload: "Failed to send OTP" });
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				toast.error(error.message);
+			}
 		}
 	};
 
 	const verifyOtp = async (data: MobileLoginSchema) => {
-		dispatch({ type: "otpVerifyStart" });
+		if (showOtpComponent && !data.otp) {
+			setError("otp", { type: "manual", message: "Otp is required" });
+			return;
+		}
+
+		if (data.otp && data.otp.trim().length < OTP_LENGTH) {
+			setError("otp", {
+				type: "manual",
+				message: `Otp must be ${OTP_LENGTH} digits`,
+			});
+			return;
+		}
+
 		try {
 			await authService.verifyOtp(data);
-			dispatch({ type: "otpVerifySuccess" });
-		} catch (err) {
-			console.log(err);
-			dispatch({ type: "otpVerifyError", payload: "Failed to send OTP" });
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				toast.error(error.message);
+			}
 		}
 	};
 
 	const requestNewCodeHandler = () => {
 		dispatch({ type: "resendCode" });
-	};
-
-	const otpUpdateHandler = (otp: string) => {
-		console.log(otp);
-		dispatch({ type: "updateOtp", payload: otp });
-	};
-
-	const mobileUpdateHandler = (mobile: string) => {
-		console.log(mobile);
-		dispatch({ type: "updateMobile", payload: mobile });
 	};
 
 	useEffect(() => {
@@ -150,12 +136,11 @@ const MobileLoginFormContainer = () => {
 				register={register}
 				errors={errors}
 				isSubmitting={isSubmitting}
-				onSubmit={handleSubmit(onSubmit, (e) => console.log(e))}
+				onSubmit={handleSubmit(onSubmit)}
 				showOtpComponent={showOtpComponent}
 				timer={timer}
 				requestNewCodeHandler={requestNewCodeHandler}
-				otpUpdateHandler={otpUpdateHandler}
-				mobileUpdateHandler={mobileUpdateHandler}
+				otpLength={OTP_LENGTH}
 			/>
 
 			<div className="border-t border-gray-200 mt-6 relative">
@@ -164,7 +149,11 @@ const MobileLoginFormContainer = () => {
 				</span>
 			</div>
 
-			<Button variant="outline" className="gap-2 text-sm mt-6">
+			<Button
+				variant="outline"
+				className="gap-2 text-sm mt-6"
+				onClick={() => navigate("/login?mode=email", { replace: true })}
+			>
 				<LuMail size={20} />
 				<span>Continue with Email</span>
 			</Button>

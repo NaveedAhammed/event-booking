@@ -1,18 +1,23 @@
 import { useRef, type ChangeEvent, type KeyboardEvent } from "react";
 import Button from "../Button/Button";
+import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 
 interface Props {
 	length?: number;
 	timer?: number;
 	requestNewCodeHandler: () => void;
-	onChange?: (otp: string) => void;
+	registration: UseFormRegisterReturn;
+	error?: FieldError;
+	disabled?: boolean;
 }
 
 function OtpInput({
 	length = 6,
 	timer,
 	requestNewCodeHandler,
-	onChange,
+	registration,
+	error,
+	disabled,
 }: Props) {
 	const inputsRef = useRef<HTMLInputElement[]>([]);
 
@@ -54,7 +59,9 @@ function OtpInput({
 		const otp = inputsRef.current
 			.map((input) => input?.value || "")
 			.join("");
-		onChange?.(otp);
+		registration.onChange({
+			target: { name: registration.name, value: otp },
+		});
 	};
 
 	return (
@@ -72,9 +79,15 @@ function OtpInput({
 						ref={(ele) => {
 							inputsRef.current[i] = ele!;
 						}}
+						disabled={disabled}
 					/>
 				))}
 			</div>
+			{error && (
+				<p className="text-xs ml-3 font-semibold text-destructive">
+					{error.message}
+				</p>
+			)}
 			<div className="flex flex-col gap-2">
 				{timer && timer > 0 ? (
 					<span className="text-xs text-gray-500 text-center">

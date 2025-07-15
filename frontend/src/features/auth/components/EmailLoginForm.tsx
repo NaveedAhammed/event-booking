@@ -28,6 +28,7 @@ function EmailLoginForm({ onSubmit, register, errors, isSubmitting }: Props) {
 				placeholder="Email"
 				registration={register("email")}
 				error={errors.email}
+				disabled={isSubmitting}
 			/>
 
 			<InputField
@@ -37,6 +38,7 @@ function EmailLoginForm({ onSubmit, register, errors, isSubmitting }: Props) {
 				error={errors.password}
 				placeholder="Password"
 				trailingIcon={HiOutlineEyeOff}
+				disabled={isSubmitting}
 			/>
 
 			<Button type="submit" disabled={isSubmitting}>

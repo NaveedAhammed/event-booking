@@ -23,7 +23,7 @@ function NavBar() {
 							<NavLink to="/">Home</NavLink>
 						</li>
 						<li>
-							<NavLink to="/login">Login</NavLink>
+							<NavLink to="/login?mode=email">Login</NavLink>
 						</li>
 						<li>
 							<LinkButton to="/register">Sign Up</LinkButton>

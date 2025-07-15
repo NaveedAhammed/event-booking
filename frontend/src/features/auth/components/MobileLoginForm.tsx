@@ -14,8 +14,7 @@ interface Props {
 	showOtpComponent: boolean;
 	timer?: number;
 	requestNewCodeHandler: () => void;
-	otpUpdateHandler: (otp: string) => void;
-	mobileUpdateHandler: (mobile: string) => void;
+	otpLength: number;
 }
 
 function MobileLoginForm({
@@ -26,8 +25,7 @@ function MobileLoginForm({
 	showOtpComponent,
 	timer,
 	requestNewCodeHandler,
-	otpUpdateHandler,
-	mobileUpdateHandler,
+	otpLength,
 }: Props) {
 	return (
 		<form className="bg-white w-96 flex flex-col gap-4" onSubmit={onSubmit}>
@@ -43,15 +41,17 @@ function MobileLoginForm({
 				placeholder="Mobile number"
 				leadingIcon={MdOutlinePhoneIphone}
 				error={errors.mobile}
-				onChange={(e) => mobileUpdateHandler(e.target.value)}
+				disabled={isSubmitting}
 			/>
 
 			{showOtpComponent && (
 				<OtpInput
 					requestNewCodeHandler={requestNewCodeHandler}
-					length={6}
+					length={otpLength}
 					timer={timer}
-					onChange={otpUpdateHandler}
+					registration={register("otp")}
+					error={errors.otp}
+					disabled={isSubmitting}
 				/>
 			)}
 

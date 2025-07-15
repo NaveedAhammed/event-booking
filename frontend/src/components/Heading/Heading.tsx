@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 interface Props {
 	title: string;
 	subTitle?: string;
@@ -6,9 +8,11 @@ interface Props {
 
 function Heading({ className, title, subTitle }: Props) {
 	return (
-		<div className={className}>
+		<div className={clsx(className, "flex flex-col gap-2")}>
 			<h2 className="text-2xl font-semibold">{title}</h2>
-			{subTitle && <p className="text-sm text-gray-500 mb-4">{subTitle}</p>}
+			{subTitle && (
+				<p className="text-sm text-gray-500 mb-4">{subTitle}</p>
+			)}
 		</div>
 	);
 }
