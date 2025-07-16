@@ -5,7 +5,7 @@ import LinkButton from "@/components/Button/LinkButton";
 
 function NavBar() {
 	return (
-		<header className="h-16 flex items-center shadow">
+		<header className="h-16 flex items-center shadow px-4 sticky top-0 bg-white z-50">
 			<div className="w-[1200px] mx-auto flex items-center justify-between">
 				<Link to="/">
 					<div className="h-12 w-12 flex items-center">
@@ -18,7 +18,7 @@ function NavBar() {
 					</div>
 				</Link>
 				<nav>
-					<ul className="flex items-center gap-8">
+					<ul className="flex items-center gap-8 text-sm 2xl:text-base">
 						<li>
 							<NavLink to="/">Home</NavLink>
 						</li>
