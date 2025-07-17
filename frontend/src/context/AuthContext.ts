@@ -1,16 +1,20 @@
-import { createContext } from "react";
+import { createContext, type Dispatch, type SetStateAction } from "react";
 
-interface User {
+export interface User {
 	id: string;
 	name: string;
 	email: string;
-	role: "USER" | "ORGANIZER" | "ADMIN";
+	role: string;
+	authProvider: string;
+	createdAt: string;
 }
 
 export interface AuthState {
 	isAuthenticated: boolean;
 	accessToken: string | null;
 	user: User | null;
+	setAccessToken: Dispatch<SetStateAction<string | null>>;
+	setUser: Dispatch<SetStateAction<User | null>>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
