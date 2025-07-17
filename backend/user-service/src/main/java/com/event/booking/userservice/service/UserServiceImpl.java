@@ -3,6 +3,7 @@ package com.event.booking.userservice.service;
 import com.event.booking.userservice.dto.LoginRequest;
 import com.event.booking.userservice.dto.OtpVerifyRequest;
 import com.event.booking.userservice.dto.RegisterRequest;
+import com.event.booking.userservice.dto.UserResponse;
 import com.event.booking.userservice.exception.*;
 import com.event.booking.userservice.exception.enums.ExceptionCode;
 import com.event.booking.userservice.mapper.UserMapper;
@@ -15,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -73,11 +77,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public Map<String, String> login(LoginRequest request) {
         String email = request.getEmail();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    log.error(USER_NOT_FOUND_WITH_EMAIL + COLON + CURLY_PLACEHOLDER, email);
-                    return new UserNotFoundException(USER_NOT_FOUND_WITH_EMAIL + COLON + email);
-                });
+        User user = findByEmail(email);
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             log.error(INVALID_CREDENTIALS);
@@ -172,6 +172,30 @@ public class UserServiceImpl implements UserService{
         return generateTokens(user);
     }
 
+    @Override
+    public UserResponse getMe() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()){
+            throw new UserUnAuthenticatedException(ExceptionCode.UN_AUTHENTICATED, UN_AUTHENTICATED, HttpStatus.UNAUTHORIZED);
+        }
+
+        String email;
+        Object principle = authentication.getPrincipal();
+
+        if (principle instanceof UserDetails userDetails){
+            email = userDetails.getUsername();
+        }else if (principle instanceof String username) {
+            email = username;
+        }else {
+            throw new RuntimeException("Unable to extract user info from context");
+        }
+
+        User user = findByEmail(email);
+
+        return UserMapper.toUserResponse(user);
+    }
+
     private Map<String, String> generateTokens(User user) {
         String accessToken = jwtService.generateToken(user, false);
         String refreshToken = jwtService.generateToken(user, true);
@@ -188,6 +212,14 @@ public class UserServiceImpl implements UserService{
                 .orElseThrow(() -> {
                     log.error(NO_USER_REGISTERED_WITH_MOBILE + COLON + CURLY_PLACEHOLDER, mobile);
                     return new UserNotFoundException(NO_USER_REGISTERED_WITH_MOBILE + COLON + mobile);
+                });
+    }
+
+    private User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error(USER_NOT_FOUND_WITH_EMAIL + COLON + CURLY_PLACEHOLDER, email);
+                    return new UserNotFoundException(USER_NOT_FOUND_WITH_EMAIL + COLON + email);
                 });
     }
 }

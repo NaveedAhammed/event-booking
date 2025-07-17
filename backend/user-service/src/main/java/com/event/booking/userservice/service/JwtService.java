@@ -1,6 +1,5 @@
 package com.event.booking.userservice.service;
 
-import com.event.booking.userservice.exception.InvalidTokenException;
 import com.event.booking.userservice.exception.UserServiceException;
 import com.event.booking.userservice.exception.enums.ExceptionCode;
 import com.event.booking.userservice.model.User;
@@ -106,7 +105,7 @@ public class JwtService {
         try {
             log.info("Validating token: {}", token);
 
-            if (token == null) throw new InvalidTokenException(INVALID_JWT_TOKEN);
+            if (token == null) return false;
 
             Jwts.parser()
                     .verifyWith((SecretKey) key(isRefreshToken))
@@ -115,7 +114,7 @@ public class JwtService {
             return true;
         }catch (Exception e) {
             log.error(INVALID_JWT_TOKEN + COLON + CURLY_PLACEHOLDER, e.getMessage());
-            throw new InvalidTokenException(INVALID_JWT_TOKEN + COLON + e.getMessage());
+            return false;
         }
     }
 

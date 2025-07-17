@@ -21,4 +21,6 @@ public interface UserService {
     void sendOtp(String mobile);
 
     Map<String, String> verifyOtp(OtpVerifyRequest request);
+
+    UserResponse getMe();
 }

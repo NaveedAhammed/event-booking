@@ -12,4 +12,10 @@ public final class Constants {
     public final static String NO_USER_REGISTERED_WITH_MOBILE = "No user registered with mobile";
     public final static String INVALID_OTP = "Invalid otp";
     public final static String FAILED_TO_SEND_OTP = "Failed to send OTP";
+    public final static String REFRESH_TOKEN = "refresh_token";
+    public final static String INVALID_ACCESS_TOKEN = "Invalid access token";
+    public final static String INVALID_REFRESH_TOKEN = "Invalid refresh token";
+    public final static String UN_AUTHENTICATED = "Un authenticated";
+    public final static String UN_AUTHORIZED = "Un authorized";
+    public final static String FORBIDDEN = "Not allowed";
 }
