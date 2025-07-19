@@ -23,6 +23,7 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static com.event.booking.userservice.constant.Constants.*;
@@ -86,6 +87,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .claim(ROLE, user.getRole().name())
+                .claim(USER_ID, user.getId())
                 .subject(user.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
@@ -98,7 +100,7 @@ public class JwtService {
     }
 
     public String extractRole(String token, boolean isRefreshToken) {
-        return extractClaim(token, claims -> claims.get("role", String.class), isRefreshToken);
+        return extractClaim(token, claims -> claims.get(ROLE, String.class), isRefreshToken);
     }
 
     public boolean validateJwtToken(String token, boolean isRefreshToken) {
